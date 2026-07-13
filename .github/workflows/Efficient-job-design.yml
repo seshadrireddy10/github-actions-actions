@@ -1,49 +1,43 @@
-# .github/workflows/demo.yml
-name: CI/CD Pipeline
+# .github/workflows/deploy.yml
+name: Multi-Environment Deployment
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+      - develop # Mandatory trigger so the staging deployment can run
 
 jobs:
-  # 1. Fast feedback loop - run linting first
-  lint:
+  # 1. Compilation/Build Phase
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install dependencies
-        run: npm ci
-      - name: Lint code
-        run: npm run lint # Fails fast if formatting/syntax is wrong
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-  # 2. Resource-intensive jobs run in parallel across multiple versions
-  test:
-    needs: lint # Ensures tests only run if linting passes successfully
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18, 20, 22] # Spins up 3 concurrent parallel runners
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }} # Injecting matrix variable
-      - name: Install dependencies
-        run: npm ci
-      - name: Run test suite
-        run: npm test
+      - name: Build Application
+        run: echo "Compiling application binaries and preparing distribution artifacts..."
 
-  # 3. Deploy only after all checks pass
-  deploy:
-    needs: [lint, test] # Deployment waits for lint and ALL 3 matrix test runners
-    if: github.ref == 'refs/heads/main'
+  # 2. Staging Deployment Phase
+  deploy-staging:
+    needs: build
+    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy application
-        run: echo "Deploying artifacts to production environment..."
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging Environment
+        run: echo "Deploying build artifacts to the Staging server..."
+
+  # 3. Production Deployment Phase
+  deploy-production:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Production Environment
+        run: echo "Deploying verified release artifacts to Production cluster..."
