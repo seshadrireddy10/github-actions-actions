@@ -1,0 +1,37 @@
+   Vagrant.configure("2") do |config|
+
+    config.vm.provision "ansible" do |ansible|
+       ansible.limit = "all"
+       ansible.playbook = "main.yml"
+       ansible.inventory_path = "staging"
+       ansible.verbose = "-vvvv"
+     end
+
+    config.vm.define "machine1" do |machine1| 
+        machine1.vm.box = "ubuntu/trusty64"
+        machine1.vm.network "private_network", ip:"192.168.77.10"
+        machine1.vm.hostname = "machine1"
+        machine1.vm.provider :virtualbox do |vb|
+           vb.name = "machine1"
+        end
+    end    
+
+    config.vm.define "machine2" do |machine2| 
+        machine2.vm.box = "ubuntu/trusty64"
+        machine2.vm.network "private_network", ip:"192.168.77.11"
+        machine2.vm.hostname = "machine2"
+        machine2.vm.provider :virtualbox do |vb|
+            vb.name = "machine2"
+        end
+    end    
+
+    config.vm.define "machine3" do |machine3| 
+        machine3.vm.box = "ubuntu/trusty64"
+        machine3.vm.network "private_network", ip:"192.168.77.12"
+        machine3.vm.hostname = "machine3"
+        machine3.vm.provider :virtualbox do |vb|
+           vb.name = "machine3"
+        end
+    end      
+end
+
