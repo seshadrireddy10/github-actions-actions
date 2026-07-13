@@ -1,0 +1,49 @@
+# .github/workflows/demo.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  # 1. Fast feedback loop - run linting first
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint code
+        run: npm run lint # Fails fast if formatting/syntax is wrong
+
+  # 2. Resource-intensive jobs run in parallel across multiple versions
+  test:
+    needs: lint # Ensures tests only run if linting passes successfully
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22] # Spins up 3 concurrent parallel runners
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }} # Injecting matrix variable
+      - name: Install dependencies
+        run: npm ci
+      - name: Run test suite
+        run: npm test
+
+  # 3. Deploy only after all checks pass
+  deploy:
+    needs: [lint, test] # Deployment waits for lint and ALL 3 matrix test runners
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy application
+        run: echo "Deploying artifacts to production environment..."
