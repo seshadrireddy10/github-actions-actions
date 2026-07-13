@@ -2,18 +2,32 @@
 
 name: CI
 on:
-    push:
-        branches: ["main"]
-
+  push:
+    branches: ["main"]
 
 jobs:
-   build:
-       runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
 
-   test:
-       needs: build # Waits for build to complete
-       runs-on: ubuntu-latest
+      - name: Compile Application
+        run: echo "Building the application assets..."
 
-   deploy:
-       needs: [build, test] # Waits for both jobs
-       runs-on: ubuntu-latest
+  test:
+    needs: build # Waits for build to complete
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Run automated tests
+        run: echo "Running test suites..."
+
+  deploy:
+    needs: [build, test] # Waits for both jobs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy application
+        run: echo "Deploying build artifacts to production server..."
