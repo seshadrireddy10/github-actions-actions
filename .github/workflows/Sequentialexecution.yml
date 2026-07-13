@@ -1,0 +1,11 @@
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+  test:
+    needs: build # Waits for build to complete
+    runs-on: ubuntu-latest
+
+  deploy:
+    needs: [build, test] # Waits for both jobs
+    runs-on: ubuntu-latest
