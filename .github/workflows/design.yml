@@ -1,0 +1,21 @@
+jobs:
+  # Fast feedback loop - run linting first
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint code
+        run: npm run lint
+
+  # Resource-intensive jobs run in parallel
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+
+  # Deploy only after all checks pass
+  deploy:
+    needs: [lint, test]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
