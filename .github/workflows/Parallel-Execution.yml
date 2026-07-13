@@ -1,0 +1,13 @@
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Linting..."
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Testing..."
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Scanning..."
